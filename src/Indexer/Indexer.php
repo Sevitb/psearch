@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Sevit\Psearch\Indexer;
 
-use Sevit\Psearch\Storage\BinaryStorage;
+use Sevit\Psearch\Storage\BinaryStorage\BinaryStorage;
 
 final readonly class Indexer
 {
@@ -20,11 +20,11 @@ final readonly class Indexer
 
         $document = new Document(
             id: (int)$this->storage->getLastDocumentId() + 1,
-            rawData: $text,
+            rawData: ['text' => $text],
             tokens: $tokensCollection,
         );
-
-        $this->storage->writeDocuments($document);
+        
+        $this->storage->writeDocument($document);
 
         var_dump($tokensCollection);
         die;

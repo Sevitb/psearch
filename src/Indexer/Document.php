@@ -10,7 +10,7 @@ final readonly class Document
 {
     public function __construct(
         private int $id,
-        private string $rawData,
+        private array $rawData,
         private TokenCollection $tokens,
     ) {
     }
@@ -20,7 +20,10 @@ final readonly class Document
         return $this->id;
     }
 
-    public function getRawData(): string
+    /**
+     * @return array<string, string|int|float>
+     */
+    public function getRawData(): array
     {
         return $this->rawData;
     }

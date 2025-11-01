@@ -4,12 +4,17 @@ declare(strict_types=1);
 
 require_once './vendor/autoload.php';
 
+use Sevit\Psearch\Configuration;
 use Sevit\Psearch\Indexer\Indexer;
 use Sevit\Psearch\Indexer\Parser;
 use Sevit\Psearch\Indexer\Tokenizers\WhitespaceTokenizer;
+use Sevit\Psearch\Storage\BinaryStorage\BinaryStorage;
 
 $indexer = new Indexer(
-    new Parser(new WhitespaceTokenizer())
+    new Parser(new WhitespaceTokenizer()),
+    new BinaryStorage(
+        new Configuration()
+    ),
 );
 
 var_dump($indexer->index('Привет! Как твои дела? У меня дела хорошо.'));
