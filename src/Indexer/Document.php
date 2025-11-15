@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Sevit\Psearch\Indexer;
 
-use Sevit\Psearch\Indexer\Tokenizers\TokenCollection;
+use JsonSerializable;
 
-final readonly class Document
+final readonly class Document implements JsonSerializable
 {
     public function __construct(
         private int $id,
@@ -25,5 +25,13 @@ final readonly class Document
     public function getRawData(): array
     {
         return $this->rawData;
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->getId(),
+            'rawData' => $this->getRawData(),
+        ];
     }
 }

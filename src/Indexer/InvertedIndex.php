@@ -15,7 +15,7 @@ final class InvertedIndex
 
     public function getTokenDocuments(string $token): ?array
     {
-        return $this->index[$token];
+        return $this->index[$token] ?? null;
     }
 
     public function getTokenDocumentsCount(string $token): int

@@ -65,6 +65,28 @@ final readonly class BinaryStorage
         return $index;
     }
 
+    /**
+     * @param Document[] $documents
+     * @return void
+     * @throws Exception
+     */
+    public function writeDocuments(array $documents): void
+    {
+        $file = $this->openDocumentsFile('wb');
+        foreach ($documents as $document) {
+            fwrite($file, pack('V', $document->getId()));
+            foreach ($document->getRawData() as $key => $value) {
+                $value = mb_convert_encoding($value, 'UTF-8', mb_detect_encoding($value));
+                fwrite($file, pack('C', strlen($key)));
+                fwrite($file, $key);
+                fwrite($file, pack('V', strlen($value)));
+                fwrite($file, $value);
+            }
+            fwrite($file, pack('C', 0));
+        }
+        fclose($file);
+    }
+
     public function writeDocument(Document $document): void
     {
         $file = $this->openDocumentsFile('wb');
@@ -128,47 +150,7 @@ final readonly class BinaryStorage
 
     public function getDocumentById(int $id): ?Document
     {
-        $file = $this->openDocumentsFile('rb');
-
-        $documents = [];
-        while (!feof($file)) {
-            $docIdBytes = fread($file, 4);
-
-            if ($docIdBytes === '') {
-                break;
-            }
-
-            $docId = unpack('V', $docIdBytes)[1];
-
-            $rawData = [];
-            while (true) {
-                $fieldNameLengthBytes = fread($file, 1);
-
-                if ($fieldNameLengthBytes === '') {
-                    break;
-                }
-
-                $fieldNameLength = unpack('C', $fieldNameLengthBytes)[1];
-
-                if (!$fieldNameLength) {
-                    break;
-                }
-
-                $field = fread($file, $fieldNameLength);
-
-                $valueLengthBytes = fread($file, 4);
-                $valueLength = unpack('V', $valueLengthBytes)[1];
-                $value = fread($file, $valueLength);
-
-                $rawData[$field] = $value;
-            }
-
-            $documents[$docId] = new Document(
-                $docId,
-                $rawData,
-            );
-        }
-        
+        $documents = $this->readAllDocuments();
         return $documents[$id] ?? null;
     }
 
@@ -198,33 +180,6 @@ final readonly class BinaryStorage
 
     private function packDocument(Document $document): void
     {
-
-    }
-
-    /**
-     * @param array<Document> $documents
-     * @return void
-     * @throws Exception
-     */
-    public function writeDocuments(array $documents): void
-    {
-        $file = fopen($this->storageContext, 'wb');
-        if (!$file) {
-            throw new Exception('Не удалось открыть файл для записи');
-        }
-
-        $invertedIndex = new InvertedIndex();
-        /** @var Document $document */
-        foreach ($documents as $document) {
-            foreach ($document->getTokens()->getAll() as $token) {
-                $documentFrequency = $document->getTokens()->getTokenFrequency($token);
-                $invertedIndex->addTokenDocument($token, $document->getId(), $documentFrequency);
-            }
-        }
-
-        foreach ($documents as $document) {
-            $this->packDocument($document);
-        }
 
     }
 

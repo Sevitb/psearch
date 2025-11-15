@@ -16,17 +16,18 @@ final readonly class Indexer
 
     public function index(string $text): IndexResult
     {
-        $tokensCollection = $this->parser->parse($text);
+        $documents = $this->storage->readAllDocuments();
+        $lastDocumentId = array_key_last($documents);
 
-        $document = new Document(
-            id: (int)$this->storage->getLastDocumentId() + 1,
+        $documents[] = $document = new Document(
+            id: (int)$lastDocumentId + 1,
             rawData: ['text' => $text],
         );
-        
-        $this->storage->writeDocument($document);
 
-        $invertedIndex = new InvertedIndex();
+        $this->storage->writeDocuments($documents);
 
+        $invertedIndex = $this->storage->readInvertedIndex();
+        $tokensCollection = $this->parser->parse($text);
         foreach ($tokensCollection->getAll() as $token) {
             $invertedIndex->addTokenDocument($token, $document->getId(), $tokensCollection->getTokenFrequency($token));
         }

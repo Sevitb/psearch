@@ -11,22 +11,24 @@ final readonly class Search
 {
     public function __construct(
         private Parser $parser,
-        private BinaryStorage $binaryStorage,
+        private BinaryStorage $storage,
     ) {
     }
 
-    public function search(string $query): array
+    public function search(string $query): SearchResult
     {
         $tokenCollection = $this->parser->parse($query);
 
-        $invertedIndex = $this->binaryStorage->readInvertedIndex();
-        $allDocuments = $this->binaryStorage->readAllDocuments();
+        $invertedIndex = $this->storage->readInvertedIndex();
+        $allDocuments = $this->storage->readAllDocuments();
         $allDocumentsCount = count($allDocuments);
 
         $documents = [];
         $tokensIdf = [];
         foreach ($tokenCollection->getAll() as $token) {
-            $tokenDocuments = $invertedIndex->getTokenDocuments($token);
+            if (!$tokenDocuments = $invertedIndex->getTokenDocuments($token)) {
+                continue;
+            }
             $tokensIdf[$token] = log($allDocumentsCount / count($tokenDocuments));
             foreach ($tokenDocuments as $documentId => $frequency) {
                 $documents[$token][$documentId] = $frequency;
@@ -43,6 +45,11 @@ final readonly class Search
             }
         }
 
-        return $documents;
+        $resultDocuments = [];
+        foreach ($tfIdf as $documentId => $frequency) {
+            $resultDocuments[] = new DocumentSearchResult($frequency, $this->storage->getDocumentById($documentId));
+        }
+
+        return new SearchResult($resultDocuments);
     }
 }
