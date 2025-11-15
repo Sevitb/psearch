@@ -11,7 +11,6 @@ final readonly class Document
     public function __construct(
         private int $id,
         private array $rawData,
-        private TokenCollection $tokens,
     ) {
     }
 
@@ -26,10 +25,5 @@ final readonly class Document
     public function getRawData(): array
     {
         return $this->rawData;
-    }
-
-    public function getTokens(): TokenCollection
-    {
-        return $this->tokens;
     }
 }
