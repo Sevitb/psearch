@@ -21,13 +21,19 @@ final readonly class Indexer
         $document = new Document(
             id: (int)$this->storage->getLastDocumentId() + 1,
             rawData: ['text' => $text],
-            tokens: $tokensCollection,
         );
         
         $this->storage->writeDocument($document);
 
-        var_dump($tokensCollection);
-        die;
+        $invertedIndex = new InvertedIndex();
+
+        foreach ($tokensCollection->getAll() as $token) {
+            $invertedIndex->addTokenDocument($token, $document->getId(), $tokensCollection->getTokenFrequency($token));
+        }
+
+        $this->storage->writeInvertedIndex($invertedIndex);
+
+        return new IndexResult();
     }
 
     private function indexDocument(Document $document): IndexResult

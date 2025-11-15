@@ -1,0 +1,19 @@
+{
+    "name": "sevit/psearch",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Sevit\\Psearch\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Alexandr Peskovatzkov",
+            "email": "peskovatzkov.vs@gmail.com"
+        }
+    ],
+    "require": {
+      "ext-mbstring": "*",
+      "ext-sysvshm": "*"
+    }
+}

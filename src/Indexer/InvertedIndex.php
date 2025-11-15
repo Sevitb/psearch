@@ -12,4 +12,19 @@ final class InvertedIndex
     {
         $this->index[$token][$documentId] = $frequency;
     }
+
+    public function getTokenDocuments(string $token): ?array
+    {
+        return $this->index[$token];
+    }
+
+    public function getTokenDocumentsCount(string $token): int
+    {
+        return count($this->index[$token] ?? []);
+    }
+
+    public function getAllTokens(): array
+    {
+        return array_keys($this->index);
+    }
 }
